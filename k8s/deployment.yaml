@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-notification
+  labels:
+    app: service-notification
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-notification
+  template:
+    metadata:
+      labels:
+        app: service-notification
+    spec:
+      containers:
+      - name: service-notification
+        #Replace with actual container registry URL
+        image: your-registry.com/issueresolutionorg/service-notification:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: service-notification-config
