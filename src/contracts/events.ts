@@ -2,22 +2,49 @@ export interface TicketCreatedEvent {
     metadata: {
         eventType: string;
         timestamp: string;
+        version?: number;
     };
     payload: {
         ticketId: string;
-        userId: string;
-        title: string;
+        creatorId: string;
+        subject: string;
+        organizationId?: string; 
+        description?: string;
     };
 }
 
-export interface TicketStatusChangedEvent {
+
+export enum OrganizationTier {
+    Premium = 'Premium',
+    Medium = 'Medium',
+    Free = 'Free'
+}
+
+export interface OrganizationCreatedEvent {
     metadata: {
         eventType: string;
         timestamp: string;
+        version?: number;
     };
     payload: {
-        ticketId: string;
-        userId: string;
-        title: string;
+        organizationId: string;
+        organizationName: string;
+        tier: OrganizationTier;
+        managerId: string;
     };
+}
+
+
+export interface UserInvitationCreated {
+    metadata: {
+        eventType: string;
+        timestamp: string;
+        version?: number;
+    };
+    payload: {
+        organizationId: string,
+        userEmail: string,
+        targetRole: string,
+        invitationToken: string;
+    }
 }

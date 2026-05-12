@@ -12,3 +12,11 @@ model UserCache {
   email     String
   updatedAt DateTime @updatedAt
 }
+
+model OrgCache {
+  organizationId    String   @id
+  organizationName     String
+  tier  String
+  managerId String
+  updatedAt DateTime @updatedAt
+}
