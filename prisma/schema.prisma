@@ -20,3 +20,9 @@ model OrgCache {
   managerId String
   updatedAt DateTime @updatedAt
 }
+
+model TicketCache {
+  ticketId  String   @id
+  creatorId String
+  updatedAt DateTime @updatedAt
+}

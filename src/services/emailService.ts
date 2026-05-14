@@ -1,6 +1,6 @@
 import { mailer } from "../config/mailer";
 import { OrganizationTier } from "../contracts/events";
-import { buildTicketCreatedHtml } from "../templates/ticketTemplates";
+import { buildTicketCreatedHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
 import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml } from "../templates/userTemplates";
 
 export const sendTicketConfirmation = async (userEmail: string, title: string, ticketId: string): Promise<boolean> => {
@@ -35,6 +35,19 @@ export const sendUserInvitationEmail = async (userEmail:string, orgName:string, 
   try {
     const subject = `New Organization Invite: ${orgName}`;
     const htmlContent = buildOrganizationInviteHtml(userEmail, orgName,targetRole, invitationLink);
+
+    await mailer.sendMail(userEmail, subject, htmlContent);
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] Error while sending sendUserInvitationEmail email to ${userEmail}:`, error);
+    return false;
+  }
+}
+
+export const sendTicketStatusEmail = async (userEmail:string, ticketId:string, oldStatus:string, newStatus:string, orgName:string): Promise<boolean> => {
+  try {
+    const subject = `[SupportHub] Ticket #${ticketId} Status Updated - ${orgName}`;
+    const htmlContent = buildTicketUpdateHtml(userEmail, ticketId, oldStatus, newStatus, orgName);
 
     await mailer.sendMail(userEmail, subject, htmlContent);
     return true;

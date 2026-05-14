@@ -48,3 +48,20 @@ export interface UserInvitationCreated {
         invitationToken: string;
     }
 }
+
+export interface TicketStatusChangedEvent {
+    metadata: {
+        eventType: string;
+        timestamp: string;
+        version?: number;
+    };
+    payload: {
+        organizationId: string,
+        ticketId: string,
+        oldStatus: string,
+        newStatus: string; 
+        changedById: string,
+        actorType: string; 
+    }
+}
+

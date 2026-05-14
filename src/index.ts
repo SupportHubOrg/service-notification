@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Kafka } from "kafkajs";
-import { TicketCreatedEvent, OrganizationCreatedEvent, UserInvitationCreated } from "./contracts/events";
-import { sendTicketConfirmation, sendOrgCreationConfirmation, sendUserInvitationEmail } from "./services/emailService";
+import { TicketCreatedEvent, OrganizationCreatedEvent, UserInvitationCreated, TicketStatusChangedEvent } from "./contracts/events";
+import { sendTicketConfirmation, sendOrgCreationConfirmation, sendUserInvitationEmail, sendTicketStatusEmail } from "./services/emailService";
 import { prisma } from "./db/prisma";
 
 const kafka = new Kafka({
@@ -27,6 +27,13 @@ async function getOrganizationNameByOrgId(organizationId: string): Promise<strin
     where: { organizationId },
   });
   return org?.organizationName || null;
+}
+
+async function getCreatorIdByTicketId(ticketId: string): Promise<string | null> {
+  const ticket = await prisma.ticketCache.findUnique({
+    where: { ticketId },
+  });
+  return ticket?.creatorId || null;
 }
 
 const publishNotificationReport = async (eventType: string, status: string, userEmail: string) => {
@@ -61,6 +68,14 @@ const handleUserInvitationAccepted = async (payload: any) => {
 const handleTicketCreated = async (rawEvent: any) => {
   const ticketEvent = rawEvent as TicketCreatedEvent;
   const { creatorId, subject, ticketId } = ticketEvent.payload;
+
+  await prisma.ticketCache.upsert({
+    where: { ticketId: ticketId },
+    update: { creatorId: creatorId },
+    create: { ticketId: ticketId, creatorId: creatorId },
+  });
+  console.log(`Cached creator data for ticket: ${ticketId}`);
+
   const email = await getEmailByUserId(creatorId);
 
   if (email) {
@@ -122,6 +137,34 @@ const handleUserInvitationCreated = async (rawEvent: any) => {
   }
 };
 
+const handleTicketStatusChanged = async (rawEvent: any) => {
+  const statusEvent = rawEvent as TicketStatusChangedEvent; 
+  const { organizationId, ticketId, oldStatus, newStatus } = statusEvent.payload;
+
+  const creatorId = await getCreatorIdByTicketId(ticketId);
+
+  if (!creatorId) {
+    console.error(`Creator ID for ticket ${ticketId} not found in cache. Cannot send status update.`);
+    await publishNotificationReport("TicketStatusNotificationFailed", "TicketNotFound", "unknown");
+    return;
+  }
+
+  const userEmail = await getEmailByUserId(creatorId);
+  const orgName = await getOrganizationNameByOrgId(organizationId);
+
+  if (userEmail) {
+    try {
+      await sendTicketStatusEmail(userEmail, ticketId, oldStatus, newStatus, orgName || "Organization");
+      await publishNotificationReport("TicketStatusNotificationSent", "Success", userEmail);
+    } catch (err) {
+      await publishNotificationReport("TicketStatusNotificationFailed", "Error", userEmail);
+    }
+  } else {
+    console.error(`Email for user ${creatorId} not found in cache.`);
+    await publishNotificationReport("TicketStatusNotificationFailed", "UserNotFound", "unknown");
+  }
+};
+
 const readEvents = async () => {
   await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events", fromBeginning: true });
   await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events", fromBeginning: true });
@@ -155,6 +198,9 @@ const readEvents = async () => {
             break;
           case "UserInvitationCreated":
             await handleUserInvitationCreated(rawEvent);
+            break;
+          case "TicketStatusChanged":
+            await handleTicketStatusChanged(rawEvent);
             break;
           default:
             console.log(`Event ${eventType} does not require email notification, skipping.`);
