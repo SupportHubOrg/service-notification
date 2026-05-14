@@ -1,6 +1,7 @@
 import { mailer } from "../config/mailer";
 import { OrganizationTier } from "../contracts/events";
-import { buildTicketCreatedHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
+import { buildPaymentCompletedHtml, buildPaymentFailedHtml } from "../templates/billingTemplates";
+import { buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
 import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml } from "../templates/userTemplates";
 
 export const sendTicketConfirmation = async (userEmail: string, title: string, ticketId: string): Promise<boolean> => {
@@ -56,3 +57,45 @@ export const sendTicketStatusEmail = async (userEmail:string, ticketId:string, o
     return false;
   }
 }
+
+
+export const sendTicketMessageEmail = async (
+  userEmail: string, ticketId: string, orgName: string, senderName: string, message: string): Promise<boolean> => {
+  try {
+    const subject = `[SupportHub] New message in Ticket #${ticketId} - ${orgName}`;
+    const htmlContent = buildTicketMessageHtml(userEmail, ticketId, orgName, senderName, message);
+
+    await mailer.sendMail(userEmail, subject, htmlContent);
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] Error while sending ticket message email to ${userEmail}:`, error);
+    return false;
+  }
+}
+
+
+export const sendPaymentCompletedEmail = async (userEmail: string,orgName: string,transactionId: string): Promise<boolean> => {
+  try {
+    const subject = `[SupportHub] Payment Receipt: Thank you for your purchase - ${orgName}`;
+    const htmlContent = buildPaymentCompletedHtml(userEmail, orgName, transactionId);
+
+    await mailer.sendMail(userEmail, subject, htmlContent);
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] Error while sending payment completed email to ${userEmail}:`, error);
+    return false;
+  }
+};
+
+export const sendPaymentFailedEmail = async (userEmail: string,orgName: string,transactionId: string,errorMessage: string): Promise<boolean> => {
+  try {
+    const subject = `[SupportHub] Action Required: Payment Failed - ${orgName}`;
+    const htmlContent = buildPaymentFailedHtml(userEmail, orgName, transactionId, errorMessage);
+
+    await mailer.sendMail(userEmail, subject, htmlContent);
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] Error while sending payment failed email to ${userEmail}:`, error);
+    return false;
+  }
+};

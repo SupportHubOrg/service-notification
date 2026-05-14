@@ -1,6 +1,7 @@
 import { consumer } from "../config/kafkaClient";
+import { handlePaymentCompleted, handlePaymentFailed } from "../handlers/billingHandlers";
 import { handleOrganizationCreated } from "../handlers/organizationHandlers";
-import { handleTicketCreated, handleTicketStatusChanged } from "../handlers/ticketHandlers";
+import { handleTicketCreated, handleTicketMessageAdded, handleTicketStatusChanged } from "../handlers/ticketHandlers";
 import { handleUserInvitationAccepted, handleUserInvitationCreated } from "../handlers/userHandlers";
 
 export const readEvents = async () => {
@@ -39,6 +40,15 @@ export const readEvents = async () => {
             break;
           case "TicketStatusChanged":
             await handleTicketStatusChanged(rawEvent);
+            break;
+          case "TicketMessageAdded": 
+            await handleTicketMessageAdded(rawEvent); 
+            break;
+          case "PaymentCompleted": 
+            await handlePaymentCompleted(rawEvent); 
+            break;
+          case "PaymentFailed": 
+            await handlePaymentFailed(rawEvent); 
             break;
           default:
             console.log(`Event ${eventType} does not require email notification, skipping.`);

@@ -65,3 +65,46 @@ export interface TicketStatusChangedEvent {
     }
 }
 
+export interface TicketMessageAddedEvent {
+        metadata: {
+        eventType: string;
+        timestamp: string;
+        version?: number;
+    };
+    payload: {
+        organizationId: string,
+        ticketId: string,
+        messageId: string,
+        senderId: string; 
+        senderType: string,
+        message: string; 
+    }
+}
+
+
+export interface PaymentCompletedEvent {
+  metadata: {
+    eventType: string;
+    timestamp: string;
+    version: number;
+  };
+  payload: {
+    organizationId: string;
+    transactionId: string;
+    status: string;
+  };
+}
+
+export interface PaymentFailedEvent {
+  metadata: {
+    eventType: string;
+    timestamp: string;
+    version: number;
+  };
+  payload: {
+    organizationId: string;
+    transactionId: string;
+    errorCode?: string;
+    errorMessage?: string;
+  };
+}
