@@ -237,3 +237,104 @@ export const buildTicketMessageHtml = (
     </html>
   `;
 };
+
+export const buildSlaDeadlineHtml = (
+  ticketId: string,
+  organizationId: string,
+  slaType: string,
+  deadlineTime: string,
+  minutesRemaining: string
+): string => {
+  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
+  const ticketUrl = `https://support-hub.io/dashboard/tickets/${ticketId}`;
+
+  const formatSlaType = (type: string) => {
+    return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  };
+
+  const formattedDeadline = new Date(deadlineTime).toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+  });
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>SLA Deadline Approaching</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f7f6; padding: 30px 10px;">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; max-width: 600px; width: 100%;">
+              
+              <tr>
+                <td align="center" style="padding: 24px; background-color: #0F172A; border-bottom: 4px solid #F59E0B;">
+                  <img src="${logoUrl}" alt="SupportHub Logo" width="200" style="display: block; border: 0; max-width: 100%; height: auto;" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding: 40px 30px; color: #334155;">
+                  <h2 style="margin: 0 0 20px; color: #D97706; font-size: 24px;">SLA Deadline Approaching ⏳</h2>
+                  <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6;">
+                    Hello Support Team,<br><br>
+                    Action is required! A ticket is at risk of breaching its Service Level Agreement (SLA) in <strong>${minutesRemaining} minutes</strong>.
+                  </p>
+
+                  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; margin: 30px 0;">
+                    <tr>
+                      <td style="padding: 20px;">
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #B45309; text-transform: uppercase; letter-spacing: 0.5px;">Alert Details</p>
+                        
+                        <p style="margin: 0 0 10px; font-size: 16px;">
+                          <strong>Ticket ID:</strong> 
+                          <span style="color: #334155;">#${ticketId}</span>
+                        </p>
+                        <p style="margin: 0 0 10px; font-size: 16px;">
+                          <strong>SLA Type:</strong> 
+                          <span style="color: #334155;">${formatSlaType(slaType)}</span>
+                        </p>
+                        <p style="margin: 0 0 10px; font-size: 16px;">
+                          <strong>Time Remaining:</strong> 
+                          <span style="color: #D97706; font-weight: bold;">${minutesRemaining} minutes</span>
+                        </p>
+                        <p style="margin: 0; font-size: 16px;">
+                          <strong>Exact Deadline:</strong> 
+                          <span style="color: #334155;">${formattedDeadline}</span>
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="center">
+                        <a href="${ticketUrl}" target="_blank" style="display: inline-block; background-color: #F59E0B; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; padding: 14px 30px; border-radius: 6px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+                          Review Ticket Now
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td align="center" style="padding: 24px 30px; background-color: #F1F5F9; color: #64748B; font-size: 14px; border-top: 1px solid #E2E8F0;">
+                  <p style="margin: 0; font-size: 12px; color: #94A3B8;">
+                    This is an automated SLA monitoring alert from SupportHub.
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+};

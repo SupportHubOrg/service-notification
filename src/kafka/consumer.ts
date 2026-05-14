@@ -1,14 +1,15 @@
 import { consumer } from "../config/kafkaClient";
 import { handlePaymentCompleted, handlePaymentFailed } from "../handlers/billingHandlers";
-import { handleOrganizationCreated } from "../handlers/organizationHandlers";
+import { handleOrganizationCreated, handleSlaDeadlineApproaching } from "../handlers/organizationHandlers";
 import { handleTicketCreated, handleTicketMessageAdded, handleTicketStatusChanged } from "../handlers/ticketHandlers";
 import { handleUserInvitationAccepted, handleUserInvitationCreated } from "../handlers/userHandlers";
 
 export const readEvents = async () => {
   await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events", fromBeginning: true });
   await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events", fromBeginning: true });
+  await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_BILLING || "billing-events", fromBeginning: true });
 
-  console.log(`Successfully listening to topics: ${process.env.KAFKA_TOPIC_READ_TICKET}, ${process.env.KAFKA_TOPIC_READ_ORG}`);
+  console.log(`Successfully listening to topics: ${process.env.KAFKA_TOPIC_READ_TICKET}, ${process.env.KAFKA_TOPIC_READ_ORG}, ${process.env.KAFKA_TOPIC_READ_BILLING}`);
 
   await consumer.run({
     eachMessage: async ({ topic, message }) => {
@@ -49,6 +50,9 @@ export const readEvents = async () => {
             break;
           case "PaymentFailed": 
             await handlePaymentFailed(rawEvent); 
+            break;
+          case "SlaDeadlineApproaching": 
+            await handleSlaDeadlineApproaching(rawEvent); 
             break;
           default:
             console.log(`Event ${eventType} does not require email notification, skipping.`);

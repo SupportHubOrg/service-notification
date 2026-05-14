@@ -1,7 +1,8 @@
+import "dotenv/config";
 import { mailer } from "../config/mailer";
 import { OrganizationTier } from "../contracts/events";
 import { buildPaymentCompletedHtml, buildPaymentFailedHtml } from "../templates/billingTemplates";
-import { buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
+import { buildSlaDeadlineHtml, buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
 import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml } from "../templates/userTemplates";
 
 export const sendTicketConfirmation = async (userEmail: string, title: string, ticketId: string): Promise<boolean> => {
@@ -99,3 +100,26 @@ export const sendPaymentFailedEmail = async (userEmail: string,orgName: string,t
     return false;
   }
 };
+
+
+export const sendSlaDeadlineApproaching = async (ticketId: string,organizationId:string,slaType:string,deadlineTime:string,minutesRemaining:string): Promise<boolean> => {
+try {
+    const subject = `[SLA Warning] Ticket ${ticketId}: ${slaType} deadline in ${minutesRemaining}m`;
+
+    const htmlContent = buildSlaDeadlineHtml(
+      ticketId,
+      organizationId,
+      slaType,
+      deadlineTime,
+      minutesRemaining
+    );
+
+    const recipient = process.env.SupportTeamEmail || "";
+    await mailer.sendMail(recipient, subject, htmlContent);
+    
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] SLA Warning Error for Ticket ${ticketId}:`, error);
+    return false;
+  }
+}
