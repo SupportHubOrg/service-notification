@@ -36,6 +36,7 @@ docker compose down
   * `TicketStatusChanged`
   * `TicketMessageAdded`
   * `SlaDeadlineApproaching`
+  * `SlaDeadlineBreached`
 * **`organization-access-events`**
   * `OrganizationCreated`
   * `UserInvitationCreated`

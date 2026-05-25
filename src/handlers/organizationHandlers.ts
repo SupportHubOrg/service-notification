@@ -1,8 +1,8 @@
-import { OrganizationCreatedEvent, SlaDeadlineApproachingEvent } from "../contracts/events";
+import { OrganizationCreatedEvent, SlaDeadlineApproachingEvent, SlaDeadlineBreachedEvent } from "../contracts/events";
 import { prisma } from "../db/prisma";
 import { publishNotificationReport } from "../kafka/producer";
 import { getEmailByUserId } from "../services/cacheService";
-import { sendOrgCreationConfirmation, sendSlaDeadlineApproaching } from "../services/emailService";
+import { sendOrgCreationConfirmation, sendSlaDeadlineApproaching, sendSlaDeadlineBreached } from "../services/emailService";
 
 export const handleOrganizationCreated = async (rawEvent: any) => {
   const orgEvent = rawEvent as OrganizationCreatedEvent;
@@ -61,5 +61,36 @@ export const handleSlaDeadlineApproaching = async (rawEvent: any) => {
   } catch (err) {
     console.error(`[SLA Handler] Failed to send warning for ticket ${ticketId}:`, err);
     await publishNotificationReport("SlaDeadlineWarningFailed", "Error", supportEmail);
+  }
+};
+
+export const handleSlaDeadlineBreached = async (rawEvent: any) => {
+  const slaEvent = rawEvent as SlaDeadlineBreachedEvent;
+  const { ticketId, organizationId, slaType, deadlineTime } = slaEvent.payload;
+  const supportEmail = process.env.SupportTeamEmail;
+
+  if (!supportEmail) {
+    console.error(`[SLA Breach Handler] SupportTeamEmail is not defined in environment variables.`);
+    await publishNotificationReport("SlaBreachNotificationFailed", "ConfigError", "missing_env");
+    return;
+  }
+
+  try {
+    const success = await sendSlaDeadlineBreached(
+      ticketId,
+      organizationId,
+      slaType,
+      deadlineTime
+    );
+
+    if (success) {
+      console.log(`[SLA Breach Handler] Breach alert sent for ticket: ${ticketId}`);
+      await publishNotificationReport("SlaDeadlineBreachSent", "Success", supportEmail);
+    } else {
+      throw new Error("SMTP transport failed");
+    }
+  } catch (err) {
+    console.error(`[SLA Breach Handler] Failed to send breach alert for ticket ${ticketId}:`, err);
+    await publishNotificationReport("SlaDeadlineBreachFailed", "Error", supportEmail);
   }
 };

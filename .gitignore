@@ -1,6 +1,8 @@
 node_modules
 .env
 
+mikroserwisy/
+
 /src/generated/prisma
 
 dist/

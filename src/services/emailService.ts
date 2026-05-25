@@ -2,7 +2,7 @@ import "dotenv/config";
 import { mailer } from "../config/mailer";
 import { OrganizationTier } from "../contracts/events";
 import { buildPaymentCompletedHtml, buildPaymentFailedHtml } from "../templates/billingTemplates";
-import { buildSlaDeadlineHtml, buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
+import { buildSlaDeadlineBreachedHtml, buildSlaDeadlineHtml, buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
 import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml } from "../templates/userTemplates";
 
 export const sendTicketConfirmation = async (userEmail: string, title: string, ticketId: string): Promise<boolean> => {
@@ -122,4 +122,30 @@ try {
     console.error(`[Email Service] SLA Warning Error for Ticket ${ticketId}:`, error);
     return false;
   }
-}
+};
+
+export const sendSlaDeadlineBreached = async (
+  ticketId: string,
+  organizationId: string,
+  slaType: string,
+  deadlineTime: string
+): Promise<boolean> => {
+  try {
+    const subject = `[SLA Breached] Ticket ${ticketId}: ${slaType} deadline exceeded`;
+
+    const htmlContent = buildSlaDeadlineBreachedHtml(
+      ticketId,
+      organizationId,
+      slaType,
+      deadlineTime
+    );
+
+    const recipient = process.env.SupportTeamEmail || "";
+    await mailer.sendMail(recipient, subject, htmlContent);
+
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] SLA Breach Error for Ticket ${ticketId}:`, error);
+    return false;
+  }
+};

@@ -122,4 +122,18 @@ export interface SlaDeadlineApproachingEvent {
     deadlineTime: string;
     minutesRemaining: number; 
   };
+}
+
+export interface SlaDeadlineBreachedEvent {
+  metadata: {
+    eventType: string;
+    timestamp: string;
+    version: number;
+  };
+  payload: {
+    ticketId: string;
+    organizationId: string;
+    slaType: 'FIRST_RESPONSE' | 'HUMAN_RESPONSE' | 'RESOLUTION';
+    deadlineTime: string;
+  };
 } 
