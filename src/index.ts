@@ -6,7 +6,7 @@ import { prisma } from "./db/prisma";
 
 const kafka = new Kafka({
   clientId: "notification-service",
-  brokers: [process.env.KAFKA_BROKER || "localhost:9092"],
+  brokers: [process.env.KAFKA_BROKER || process.env.ConnectionStrings__kafka || "localhost:9092"],
 });
 
 const consumer = kafka.consumer({
@@ -44,8 +44,8 @@ const publishNotificationReport = async (eventType: string, status: string, user
 };
 
 const readEvents = async () => {
-  await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events", fromBeginning: true });
-  await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events", fromBeginning: true });
+  await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events", fromBeginning: false });
+  await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events", fromBeginning: false });
 
   console.log(`Successfully listening to topics: ${process.env.KAFKA_TOPIC_READ_TICKET}, ${process.env.KAFKA_TOPIC_READ_ORG}`);
 
@@ -117,6 +117,35 @@ const readEvents = async () => {
       }
     },
   });
+};
+
+const createKafkaTopics = async () => {
+  try {
+    const adminClient = kafka.admin();
+    await adminClient.connect();
+    
+    const existingTopics = await adminClient.fetchTopicMetadata();
+    const existingTopicNames = new Set(existingTopics.topics.map(t => t.name));
+
+    const topicsNeeded = [
+      process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events",
+      process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events",
+      process.env.KAFKA_TOPIC_WRITE || "notification-events",
+    ];
+
+    const topicsToCreate = topicsNeeded
+      .filter(topic => !existingTopicNames.has(topic))
+      .map(topic => ({ topic, numPartitions: 1, replicationFactor: 1 }));
+
+    if (topicsToCreate.length > 0) {
+      await adminClient.createTopics({ topics: topicsToCreate, validateOnly: false });
+      console.log("Topics created:", topicsToCreate.map(t => t.topic).join(", "));
+    }
+
+    await adminClient.disconnect();
+  } catch (error) {
+    console.log("Topics already exist or could not be created:", error);
+  }
 };
 
 const run = async () => {
