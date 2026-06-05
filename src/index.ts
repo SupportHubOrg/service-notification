@@ -149,6 +149,8 @@ const createKafkaTopics = async () => {
 };
 
 const run = async () => {
+  createKafkaTopics();
+
   await producer.connect();
   console.log("Producer Connected Successfully");
   await consumer.connect();
