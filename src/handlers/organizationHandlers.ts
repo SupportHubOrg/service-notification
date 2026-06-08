@@ -35,13 +35,8 @@ export const handleOrganizationCreated = async (rawEvent: any) => {
   const { organizationId, organizationName, tier, managerId } = orgEvent.payload;
 
   // C# serializes enum as integer by default. Convert it back to string enum.
-  const rawTier = tier as unknown as number | string;
-  let tierString = "Free";
-  if (typeof rawTier === "number") {
-      tierString = rawTier === 0 ? "Free" : rawTier === 1 ? "Medium" : "Premium";
-  } else if (rawTier) {
-      tierString = rawTier.toString();
-  }
+  const rawTier = tier as unknown as number;
+  const tierString = rawTier === 0 ? "Free" : rawTier === 1 ? "Standard" : rawTier === 2 ? "Pro" : "Enterprise";
 
   await prisma.orgCache.upsert({
     where: { organizationId },
