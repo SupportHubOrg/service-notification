@@ -85,10 +85,10 @@ const readEvents = async () => {
             const email = await getEmailByUserId(userId);
 
             if (email) {
-              try {
-                await sendTicketConfirmation(email, title, ticketId);
+              const isSent = await sendTicketConfirmation(email, title, ticketId);
+              if (isSent) {
                 await publishNotificationReport("NotificationSent", "Success", email);
-              } catch (err) {
+              } else {
                 await publishNotificationReport("NotificationFailed", "Error", email);
               }
             } else {
