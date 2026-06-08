@@ -3,7 +3,38 @@ import { consumer, producer } from "./config/kafkaClient";
 import { prisma } from "./db/prisma";
 import { readEvents } from "./kafka/consumer";
 
+const createKafkaTopics = async () => {
+  try {
+    const adminClient = kafka.admin();
+    await adminClient.connect();
+    
+    const existingTopics = await adminClient.fetchTopicMetadata();
+    const existingTopicNames = new Set(existingTopics.topics.map(t => t.name));
+
+    const topicsNeeded = [
+      process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events",
+      process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events",
+      process.env.KAFKA_TOPIC_WRITE || "notification-events",
+    ];
+
+    const topicsToCreate = topicsNeeded
+      .filter(topic => !existingTopicNames.has(topic))
+      .map(topic => ({ topic, numPartitions: 1, replicationFactor: 1 }));
+
+    if (topicsToCreate.length > 0) {
+      await adminClient.createTopics({ topics: topicsToCreate, validateOnly: false });
+      console.log("Topics created:", topicsToCreate.map(t => t.topic).join(", "));
+    }
+
+    await adminClient.disconnect();
+  } catch (error) {
+    console.log("Topics already exist or could not be created:", error);
+  }
+};
+
 const run = async () => {
+  createKafkaTopics();
+
   await producer.connect();
   console.log("Producer Connected Successfully");
   
