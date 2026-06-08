@@ -34,6 +34,22 @@ export interface OrganizationCreatedEvent {
     };
 }
 
+export interface OrganizationRegisteredEvent {
+    metadata: {
+        eventType: string;
+        timestamp: string;
+        version?: number;
+    };
+    payload: {
+        organizationId: string;
+        organizationName: string;
+        tier: OrganizationTier;
+        managerId: string;
+        managerEmail: string;
+        token: string;
+    };
+}
+
 
 export interface UserInvitationCreated {
     metadata: {

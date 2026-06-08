@@ -1,5 +1,73 @@
 import { OrganizationTier } from "../contracts/events";
 
+export const buildOrganizationRegisteredHtml = (
+  managerEmail: string, 
+  organizationName: string, 
+  confirmationLink: string
+): string => {
+  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
+  const displayName = managerEmail.split('@')[0];
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Confirm Your Organization</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f7f6; padding: 30px 10px;">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; max-width: 600px; width: 100%;">
+              
+              <tr>
+                <td align="center" style="padding: 24px; background-color: #0F172A; border-bottom: 4px solid #3B82F6;">
+                  <img src="${logoUrl}" alt="SupportHub Logo" width="200" style="display: block; border: 0; max-width: 100%; height: auto;" />
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding: 40px 30px; color: #334155;">
+                  <h2 style="margin: 0 0 20px; color: #0F172A; font-size: 24px;">Action Required, ${displayName}!</h2>
+                  <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6;">
+                    You have successfully registered the organization <strong>${organizationName}</strong>. 
+                    Before you can start using it, please confirm your email address and activate your workspace.
+                  </p>
+
+                  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="center" style="padding: 20px 0;">
+                        <a href="${confirmationLink}" target="_blank" style="display: inline-block; background-color: #10B981; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; padding: 14px 30px; border-radius: 6px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);">
+                          Confirm Organization
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="margin: 20px 0 0; font-size: 14px; color: #64748B; text-align: center;">
+                    If the button doesn't work, copy and paste this link into your browser:<br>
+                    <a href="${confirmationLink}" style="color: #3B82F6; text-decoration: underline; word-break: break-all;">${confirmationLink}</a>
+                  </p>
+                </td>
+              </tr>
+
+              <tr>
+                <td align="center" style="padding: 24px 30px; background-color: #F1F5F9; color: #64748B; font-size: 14px; border-top: 1px solid #E2E8F0;">
+                  <p style="margin: 0 0 10px;">Best regards,<br><strong style="color: #0F172A;">The SupportHub Team</strong></p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+};
+
 export const buildOrganizationCreatedHtml = (
   userEmail: string, 
   organizationName: string, 

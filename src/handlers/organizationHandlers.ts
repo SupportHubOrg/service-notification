@@ -1,17 +1,52 @@
-import { OrganizationCreatedEvent, SlaDeadlineApproachingEvent, SlaDeadlineBreachedEvent } from "../contracts/events";
+import { OrganizationCreatedEvent, OrganizationRegisteredEvent, SlaDeadlineApproachingEvent, SlaDeadlineBreachedEvent, OrganizationTier } from "../contracts/events";
 import { prisma } from "../db/prisma";
 import { publishNotificationReport } from "../kafka/producer";
 import { getEmailByUserId } from "../services/cacheService";
-import { sendOrgCreationConfirmation, sendSlaDeadlineApproaching, sendSlaDeadlineBreached } from "../services/emailService";
+import { sendOrgCreationConfirmation, sendOrgRegistrationConfirmation, sendSlaDeadlineApproaching, sendSlaDeadlineBreached } from "../services/emailService";
+
+export const handleOrganizationRegistered = async (rawEvent: any) => {
+  const orgEvent = rawEvent as OrganizationRegisteredEvent;
+  const { organizationId, organizationName, managerEmail, managerId, token } = orgEvent.payload;
+
+  if (managerId && managerEmail) {
+    await prisma.userCache.upsert({
+      where: { userId: managerId },
+      update: { email: managerEmail },
+      create: { userId: managerId, email: managerEmail },
+    });
+    console.log(`Cached email for manager: ${managerId}`);
+  }
+
+  if (managerEmail) {
+    try {
+      await sendOrgRegistrationConfirmation(managerEmail, organizationName, organizationId, token);
+      await publishNotificationReport("NotificationOrgRegistrationSent", "Success", managerEmail);
+    } catch (err) {
+      await publishNotificationReport("NotificationOrgRegistrationSentFailed", "Error", managerEmail);
+    }
+  } else {
+    console.error(`Email for organization ${organizationId} registration is missing in payload.`);
+    await publishNotificationReport("NotificationFailed", "MissingEmail", "unknown");
+  }
+};
 
 export const handleOrganizationCreated = async (rawEvent: any) => {
   const orgEvent = rawEvent as OrganizationCreatedEvent;
   const { organizationId, organizationName, tier, managerId } = orgEvent.payload;
 
+  // C# serializes enum as integer by default. Convert it back to string enum.
+  const rawTier = tier as unknown as number | string;
+  let tierString = "Free";
+  if (typeof rawTier === "number") {
+      tierString = rawTier === 0 ? "Free" : rawTier === 1 ? "Medium" : "Premium";
+  } else if (rawTier) {
+      tierString = rawTier.toString();
+  }
+
   await prisma.orgCache.upsert({
     where: { organizationId },
-    update: { organizationName, tier, managerId },
-    create: { organizationId, organizationName, tier, managerId },
+    update: { organizationName, tier: tierString, managerId },
+    create: { organizationId, organizationName, tier: tierString, managerId },
   });
   console.log(`Cached organization data for org: ${organizationId}`);
 
@@ -19,7 +54,7 @@ export const handleOrganizationCreated = async (rawEvent: any) => {
 
   if (email) {
     try {
-      await sendOrgCreationConfirmation(email, organizationName, organizationId, tier);
+      await sendOrgCreationConfirmation(email, organizationName, organizationId, tierString as OrganizationTier);
       await publishNotificationReport("NotificationOrgCreationSent", "Success", email);
     } catch (err) {
       await publishNotificationReport("NotificationOrgCreationSentFailed", "Error", email);

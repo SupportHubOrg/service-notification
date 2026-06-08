@@ -3,7 +3,22 @@ import { mailer } from "../config/mailer";
 import { OrganizationTier } from "../contracts/events";
 import { buildPaymentCompletedHtml, buildPaymentFailedHtml } from "../templates/billingTemplates";
 import { buildSlaDeadlineBreachedHtml, buildSlaDeadlineHtml, buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
-import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml } from "../templates/userTemplates";
+import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml, buildOrganizationRegisteredHtml } from "../templates/userTemplates";
+
+export const sendOrgRegistrationConfirmation = async (managerEmail: string, organizationName: string, organizationId: string, token: string): Promise<boolean> => {
+  try {
+    const subject = `Action Required: Confirm Organization ${organizationName}`;
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const confirmationLink = `${baseUrl}/confirm-organization?orgId=${organizationId}&token=${token}`;
+    const htmlContent = buildOrganizationRegisteredHtml(managerEmail, organizationName, confirmationLink);
+
+    await mailer.sendMail(managerEmail, subject, htmlContent);
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] Error while sending sendOrgRegistrationConfirmation email to ${managerEmail}:`, error);
+    return false;
+  }
+};
 
 export const sendTicketConfirmation = async (userEmail: string, title: string, ticketId: string): Promise<boolean> => {
   try {
