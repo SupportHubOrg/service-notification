@@ -15,8 +15,8 @@ export function deriveIdempotencyKey(
       return `TicketStatusChanged:${payload.ticketId}:${payload.newStatus}:${payload.changedById}`;
     case "TicketMessageAdded":
       return `TicketMessageAdded:${payload.messageId}`;
-    case "PaymentCompleted":
-      return `PaymentCompleted:${payload.transactionId}`;
+    case "PaymentConfirmed":
+      return `PaymentConfirmed:${payload.transactionId}`;
     case "PaymentFailed":
       return `PaymentFailed:${payload.transactionId}`;
     case "SlaDeadlineApproaching":

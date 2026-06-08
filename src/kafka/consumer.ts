@@ -13,7 +13,7 @@ const HANDLED_EVENT_TYPES = new Set([
   "UserInvitationCreated",
   "TicketStatusChanged",
   "TicketMessageAdded",
-  "PaymentCompleted",
+  "PaymentConfirmed",
   "PaymentFailed",
   "SlaDeadlineApproaching",
   "SlaDeadlineBreached",
@@ -79,7 +79,7 @@ export const readEvents = async () => {
           case "TicketMessageAdded":
             await handleTicketMessageAdded(rawEvent);
             break;
-          case "PaymentCompleted":
+          case "PaymentConfirmed":
             await handlePaymentCompleted(rawEvent);
             break;
           case "PaymentFailed":

@@ -12,4 +12,4 @@ RUN npx prisma generate
 
 COPY . .
 
-CMD ["npx", "ts-node", "src/index.ts"]
+CMD sh -c "npx prisma db push --accept-data-loss && npx ts-node src/index.ts"

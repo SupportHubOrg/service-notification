@@ -15,6 +15,7 @@ const createKafkaTopics = async () => {
       process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events",
       process.env.KAFKA_TOPIC_READ_ORG || "organization-access-events",
       process.env.KAFKA_TOPIC_WRITE || "notification-events",
+      process.env.KAFKA_TOPIC_READ_BILLING || "billing-events",
     ];
 
     const topicsToCreate = topicsNeeded
