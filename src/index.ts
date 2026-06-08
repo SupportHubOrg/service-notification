@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { consumer, producer } from "./config/kafkaClient";
+import { kafka, consumer, producer } from "./config/kafkaClient";
 import { prisma } from "./db/prisma";
 import { readEvents } from "./kafka/consumer";
 
@@ -9,7 +9,7 @@ const createKafkaTopics = async () => {
     await adminClient.connect();
     
     const existingTopics = await adminClient.fetchTopicMetadata();
-    const existingTopicNames = new Set(existingTopics.topics.map(t => t.name));
+    const existingTopicNames = new Set(existingTopics.topics.map((t: any) => t.name));
 
     const topicsNeeded = [
       process.env.KAFKA_TOPIC_READ_TICKET || "ticket-management-events",
@@ -23,7 +23,7 @@ const createKafkaTopics = async () => {
 
     if (topicsToCreate.length > 0) {
       await adminClient.createTopics({ topics: topicsToCreate, validateOnly: false });
-      console.log("Topics created:", topicsToCreate.map(t => t.topic).join(", "));
+      console.log("Topics created:", topicsToCreate.map((t: any) => t.topic).join(", "));
     }
 
     await adminClient.disconnect();
@@ -33,7 +33,7 @@ const createKafkaTopics = async () => {
 };
 
 const run = async () => {
-  createKafkaTopics();
+  await createKafkaTopics();
 
   await producer.connect();
   console.log("Producer Connected Successfully");
