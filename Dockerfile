@@ -1,16 +1,15 @@
-FROM node:20-alpine AS runtime
+FROM node:20-alpine
+
 WORKDIR /usr/src/app
 
-#Copy package files and install production dependencies
-COPY src/Notification/package*.json ./
-RUN npm install --omit=dev
+COPY package*.json ./
 
-#Copy the application source code
-COPY src/Notification/ ./
+COPY prisma ./prisma
 
-#Define environment variables
-ENV NODE_ENV=production
+RUN npm install
 
-EXPOSE 3000
+RUN npx prisma generate
 
-CMD ["npm", "start"]
+COPY . .
+
+CMD ["npx", "ts-node", "src/index.ts"]

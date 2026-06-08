@@ -1,18 +1,24 @@
 version: '3.8'
 
 services:
-  notification-db:
+  notification-service:
+    build: .
+    container_name: notification-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - notification-postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  notification-postgres:
     image: postgres:15-alpine
     container_name: notification-postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: StrongPass123
       POSTGRES_DB: notification_db
     ports:
       - "5432:5432"
-    volumes:
-      - notification-db-data:/var/lib/postgresql/data
-
-volumes:
-  notification-db-data:
