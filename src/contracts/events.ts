@@ -60,6 +60,7 @@ export interface UserInvitationCreated {
     };
     payload: {
         organizationId: string,
+        userId: string,
         userEmail: string,
         targetRole: string,
         invitationToken: string;

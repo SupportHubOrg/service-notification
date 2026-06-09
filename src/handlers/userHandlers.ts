@@ -16,10 +16,10 @@ export const handleUserInvitationAccepted = async (payload: any) => {
 
 export const handleUserInvitationCreated = async (rawEvent: any) => {
   const userInviteEvent = rawEvent as UserInvitationCreated;
-  const { organizationId, userEmail, targetRole, invitationToken } = userInviteEvent.payload;
+  const { organizationId, userId, userEmail, targetRole, invitationToken } = userInviteEvent.payload;
 
   const orgName = await getOrganizationNameByOrgId(organizationId);
-  const invitationLink = `https://support-hub.io/accept-invite?token=${invitationToken}&orgId=${organizationId}`;
+  const invitationLink = `http://localhost:5173/invite?userId=${userId}&token=${invitationToken}&email=${encodeURIComponent(userEmail)}`;
 
   if (orgName && userEmail) {
     try {
