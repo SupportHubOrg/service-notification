@@ -18,11 +18,12 @@ export const handleTicketCreated = async (rawEvent: any) => {
   const email = await getEmailByUserId(creatorId);
 
   if (email) {
-    try {
-      await sendTicketConfirmation(email, subject, ticketId);
+    const emailSuccess = await sendTicketConfirmation(email, subject, ticketId);
+
+    if (emailSuccess) {
       await publishNotificationReport("NotificationSent", "Success", email);
-    } catch (err) {
-      await publishNotificationReport("NotificationFailed", "Error", email);
+    } else {
+      await publishNotificationReport("NotificationFailed", "SMTP_Transport_Error", email);
     }
   } else {
     console.error(`Email for user ${creatorId} not found in cache.`);

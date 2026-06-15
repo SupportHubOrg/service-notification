@@ -1,4 +1,4 @@
-import { OrganizationCreatedEvent, SlaDeadlineApproachingEvent, SlaDeadlineBreachedEvent } from "../contracts/events";
+import { OrganizationCreatedEvent, SlaDeadlineApproachingEvent, SlaDeadlineBreachedEvent, OrganizationTier } from "../contracts/events";
 import { prisma } from "../db/prisma";
 import { publishNotificationReport } from "../kafka/producer";
 import { getEmailByUserId } from "../services/cacheService";
@@ -8,10 +8,12 @@ export const handleOrganizationCreated = async (rawEvent: any) => {
   const orgEvent = rawEvent as OrganizationCreatedEvent;
   const { organizationId, organizationName, tier, managerId } = orgEvent.payload;
 
+  const dbStringTier = OrganizationTier[tier];
+
   await prisma.orgCache.upsert({
     where: { organizationId },
-    update: { organizationName, tier, managerId },
-    create: { organizationId, organizationName, tier, managerId },
+    update: { organizationName, tier: dbStringTier, managerId },
+    create: { organizationId, organizationName, tier: dbStringTier, managerId },
   });
   console.log(`Cached organization data for org: ${organizationId}`);
 

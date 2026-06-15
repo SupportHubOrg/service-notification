@@ -15,9 +15,11 @@ export interface TicketCreatedEvent {
 
 
 export enum OrganizationTier {
-    Premium = 'Premium',
-    Medium = 'Medium',
-    Free = 'Free'
+    FREE = 0,
+    STANDARD = 1,
+    PRO = 2,
+    ENTERPRISE = 3,
+    SUSPENDED = 99
 }
 
 export interface OrganizationCreatedEvent {

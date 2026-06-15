@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: service-notification
+  name: notification-service
 spec:
   selector:
-    app: service-notification
+    app: notification-service
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 5002

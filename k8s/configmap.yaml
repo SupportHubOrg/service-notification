@@ -1,9 +1,17 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: service-notification-config
+  name: notification-service-config
 data:
-  #Inject standard production flags
-  ASPNETCORE_ENVIRONMENT: "Production"
   NODE_ENV: "production"
-  #Service-specific environment variables will be added here
+  #Route traffic to the internal Kubernetes Kafka service
+  KAFKA_BROKER: "kafka-cluster-kafka-bootstrap:9092"
+  KAFKA_GROUP_ID: "notification-group"
+  KAFKA_TOPIC_READ_TICKET: "ticket-management-events"
+  KAFKA_TOPIC_READ_ORG: "organization-access-events"
+  KAFKA_TOPIC_READ_BILLING: "billing-events"
+  KAFKA_TOPIC_WRITE: "notification-events"
+  #Route traffic to an email service
+  SMTP_HOST: "sandbox.smtp.mailtrap.io"
+  SMTP_PORT: "2525"
+  SupportTeamEmail: "support@supporthub.com"
