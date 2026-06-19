@@ -8,7 +8,7 @@ import { processIdempotently } from "../services/idempotencyService";
 const HANDLED_EVENT_TYPES = new Set([
   "UserInvitationAccepted",
   "TicketCreated",
-  "OrganizationCreated",
+  "OrganizationRegistered",
   "UserInvitationCreated",
   "TicketStatusChanged",
   "TicketMessageAdded",
@@ -63,7 +63,7 @@ export const readEvents = async () => {
           case "TicketCreated":
             await handleTicketCreated(rawEvent);
             break;
-          case "OrganizationCreated":
+          case "OrganizationRegistered":
             await handleOrganizationCreated(rawEvent);
             break;
           case "UserInvitationCreated":
