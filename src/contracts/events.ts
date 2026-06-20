@@ -33,6 +33,7 @@ export interface OrganizationCreatedEvent {
         organizationName: string;
         tier: OrganizationTier;
         managerId: string;
+        managerEmail: string;
     };
 }
 

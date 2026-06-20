@@ -12,6 +12,6 @@ data:
   KAFKA_TOPIC_READ_BILLING: "billing-events"
   KAFKA_TOPIC_WRITE: "notification-events"
   #Route traffic to an email service
-  SMTP_HOST: "sandbox.smtp.mailtrap.io"
-  SMTP_PORT: "2525"
+  NODEMAILER_HOST: "sandbox.smtp.mailtrap.io"
+  NODEMAILER_PORT: "2525"
   SupportTeamEmail: "support@supporthub.com"

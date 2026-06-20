@@ -6,7 +6,7 @@ import { sendOrgCreationConfirmation, sendSlaDeadlineApproaching, sendSlaDeadlin
 
 export const handleOrganizationCreated = async (rawEvent: any) => {
   const orgEvent = rawEvent as OrganizationCreatedEvent;
-  const { organizationId, organizationName, tier, managerId } = orgEvent.payload;
+  const { organizationId, organizationName, tier, managerId, managerEmail } = orgEvent.payload;
 
   const dbStringTier = OrganizationTier[tier];
 
@@ -17,7 +17,7 @@ export const handleOrganizationCreated = async (rawEvent: any) => {
   });
   console.log(`Cached organization data for org: ${organizationId}`);
 
-  const email = await getEmailByUserId(managerId);
+  const email = managerEmail ||await getEmailByUserId(managerId);
 
   if (email) {
     try {
