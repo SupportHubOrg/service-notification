@@ -2,7 +2,9 @@ export function deriveIdempotencyKey(
   eventType: string,
   payload: Record<string, unknown>
 ): string | null {
-  switch (eventType) {
+  switch (eventType) { 
+    case "OrganizationRegistered":
+      return `OrganizationRegistered:${payload.organizationId}`;
     case "OrganizationCreated":
       return `OrganizationCreated:${payload.organizationId}`;
     case "UserInvitationCreated":

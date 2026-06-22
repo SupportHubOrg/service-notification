@@ -16,14 +16,14 @@ export const handleUserInvitationAccepted = async (payload: any) => {
 
 export const handleUserInvitationCreated = async (rawEvent: any) => {
   const userInviteEvent = rawEvent as UserInvitationCreated;
-  const { organizationId, userEmail, targetRole, invitationToken } = userInviteEvent.payload;
+  const { organizationId, userId, userEmail, targetRole, invitationToken } = userInviteEvent.payload;
 
   const orgName = await getOrganizationNameByOrgId(organizationId);
-  const invitationLink = `https://support-hub.io/accept-invite?token=${invitationToken}&orgId=${organizationId}`;
+  const invitationLink = `https://dingbat-brussels-dimmer.ngrok-free.dev/accept-invite?token=${invitationToken}&orgId=${organizationId}&userId=${userId}`;
 
   if (orgName && userEmail) {
     try {
-      await sendUserInvitationEmail(userEmail, orgName, targetRole, invitationLink);
+      await sendUserInvitationEmail(userEmail, orgName, targetRole || "User", invitationLink);
       await publishNotificationReport("UserInvitationSent", "Success", userEmail);
     } catch (err) {
       await publishNotificationReport("UserInvitationSentFailed", "Error", userEmail);

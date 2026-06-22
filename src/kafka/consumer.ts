@@ -1,6 +1,6 @@
 import { consumer } from "../config/kafkaClient";
 import { handlePaymentCompleted, handlePaymentFailed } from "../handlers/billingHandlers";
-import { handleOrganizationCreated, handleSlaDeadlineApproaching, handleSlaDeadlineBreached } from "../handlers/organizationHandlers";
+import { handleOrganizationCreated, handleSlaDeadlineApproaching, handleSlaDeadlineBreached, handleOrganizationRegistered } from "../handlers/organizationHandlers";
 import { handleTicketCreated, handleTicketMessageAdded, handleTicketStatusChanged } from "../handlers/ticketHandlers";
 import { handleUserInvitationAccepted, handleUserInvitationCreated } from "../handlers/userHandlers";
 import { processIdempotently } from "../services/idempotencyService";
@@ -9,6 +9,7 @@ const HANDLED_EVENT_TYPES = new Set([
   "UserInvitationAccepted",
   "TicketCreated",
   "OrganizationRegistered",
+  "OrganizationCreated",
   "UserInvitationCreated",
   "TicketStatusChanged",
   "TicketMessageAdded",
@@ -64,6 +65,9 @@ export const readEvents = async () => {
             await handleTicketCreated(rawEvent);
             break;
           case "OrganizationRegistered":
+            await handleOrganizationRegistered(rawEvent);
+            break;
+          case "OrganizationCreated":
             await handleOrganizationCreated(rawEvent);
             break;
           case "UserInvitationCreated":

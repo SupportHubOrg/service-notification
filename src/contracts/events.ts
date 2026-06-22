@@ -45,10 +45,11 @@ export interface UserInvitationCreated {
         version?: number;
     };
     payload: {
-        organizationId: string,
-        userEmail: string,
-        targetRole: string,
+        organizationId: string;
+        userId: string;
+        userEmail: string;
         invitationToken: string;
+        targetRole?: string;
     }
 }
 

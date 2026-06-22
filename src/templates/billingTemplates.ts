@@ -1,4 +1,4 @@
-const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
+const logoUrl = "https://dingbat-brussels-dimmer.ngrok-free.dev/assets/img/logo_text.svg"; 
 
 export const buildPaymentCompletedHtml = (
   userEmail: string,
@@ -73,7 +73,7 @@ export const buildPaymentFailedHtml = (
   errorMessage: string
 ): string => {
   const displayName = userEmail.split('@')[0];
-  const billingUrl = `https://support-hub.io/dashboard/billing`;
+  const billingUrl = `https://dingbat-brussels-dimmer.ngrok-free.dev/dashboard/billing`;
   
   return `
     <!DOCTYPE html>

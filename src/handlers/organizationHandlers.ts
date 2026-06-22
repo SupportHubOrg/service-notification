@@ -2,12 +2,23 @@ import { OrganizationCreatedEvent, SlaDeadlineApproachingEvent, SlaDeadlineBreac
 import { prisma } from "../db/prisma";
 import { publishNotificationReport } from "../kafka/producer";
 import { getEmailByUserId } from "../services/cacheService";
-import { sendOrgCreationConfirmation, sendSlaDeadlineApproaching, sendSlaDeadlineBreached } from "../services/emailService";
+import { sendOrgCreationConfirmation, sendSlaDeadlineApproaching, sendSlaDeadlineBreached, sendOrgRegistrationConfirmation } from "../services/emailService";
+
+export const handleOrganizationRegistered = async (rawEvent: any) => {
+  const { organizationId, organizationName, managerId, managerEmail, token } = rawEvent.payload;
+
+  if (managerEmail) {
+    try {
+      await sendOrgRegistrationConfirmation(managerEmail, organizationName, organizationId, managerId, token);
+      await publishNotificationReport("NotificationOrgConfirmationSent", "Success", managerEmail);
+    } catch (err) {
+      console.error(`[Handler] Failed to dispatch verification email to ${managerEmail}:`, err);
+    }
+  }
+};
 
 export const handleOrganizationCreated = async (rawEvent: any) => {
-  const orgEvent = rawEvent as OrganizationCreatedEvent;
-  const { organizationId, organizationName, tier, managerId, managerEmail } = orgEvent.payload;
-
+  const { organizationId, organizationName, tier, managerId } = rawEvent.payload;
   const dbStringTier = OrganizationTier[tier];
 
   await prisma.orgCache.upsert({
@@ -15,20 +26,16 @@ export const handleOrganizationCreated = async (rawEvent: any) => {
     update: { organizationName, tier: dbStringTier, managerId },
     create: { organizationId, organizationName, tier: dbStringTier, managerId },
   });
-  console.log(`Cached organization data for org: ${organizationId}`);
+  console.log(`[Handler] Cached finalized workspace records for org: ${organizationId}`);
 
-  const email = managerEmail ||await getEmailByUserId(managerId);
-
+  const email = await getEmailByUserId(managerId);
   if (email) {
     try {
       await sendOrgCreationConfirmation(email, organizationName, organizationId, tier);
-      await publishNotificationReport("NotificationOrgCreationSent", "Success", email);
+      await publishNotificationReport("NotificationOrgActivationSent", "Success", email);
     } catch (err) {
-      await publishNotificationReport("NotificationOrgCreationSentFailed", "Error", email);
+      console.error(`[Handler] Failed to dispatch welcome email to ${email}:`, err);
     }
-  } else {
-    console.error(`Email for user ${managerId} not found in cache.`);
-    await publishNotificationReport("NotificationFailed", "UserNotFound", "unknown");
   }
 };
 

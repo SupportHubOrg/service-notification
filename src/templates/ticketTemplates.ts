@@ -1,5 +1,5 @@
 export const buildTicketCreatedHtml = (title: string, ticketId: string): string => {
-  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
+  const logoUrl = "https://dingbat-brussels-dimmer.ngrok-free.dev/assets/img/logo_text.svg"; 
   
   return `
     <!DOCTYPE html>
@@ -76,7 +76,7 @@ export const buildTicketUpdateHtml = (
   newStatus: string,
   orgName: string
 ): string => {
-  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
+  const logoUrl = "https://dingbat-brussels-dimmer.ngrok-free.dev/assets/img/logo_text.svg"; 
   const displayName = userEmail.split('@')[0];
   
   return `
@@ -163,9 +163,9 @@ export const buildTicketMessageHtml = (
   senderName: string,
   messageText: string
 ): string => {
-  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
+  const logoUrl = "https://dingbat-brussels-dimmer.ngrok-free.dev/assets/img/logo_text.svg"; 
   const displayName = userEmail.split('@')[0];
-  const ticketUrl = `https://support-hub.io/dashboard/tickets/${ticketId}`;
+  const ticketUrl = `https://dingbat-brussels-dimmer.ngrok-free.dev/dashboard/tickets/${ticketId}`;
   
   return `
     <!DOCTYPE html>
@@ -245,8 +245,8 @@ export const buildSlaDeadlineHtml = (
   deadlineTime: string,
   minutesRemaining: string
 ): string => {
-  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg"; 
-  const ticketUrl = `https://support-hub.io/dashboard/tickets/${ticketId}`;
+  const logoUrl = "https://dingbat-brussels-dimmer.ngrok-free.dev/assets/img/logo_text.svg"; 
+  const ticketUrl = `https://dingbat-brussels-dimmer.ngrok-free.dev/dashboard/tickets/${ticketId}`;
 
   const formatSlaType = (type: string) => {
     return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
@@ -345,8 +345,8 @@ export const buildSlaDeadlineBreachedHtml = (
   slaType: string,
   deadlineTime: string
 ): string => {
-  const logoUrl = "https://support-hub.io/assets/img/logo_text.svg";
-  const ticketUrl = `https://support-hub.io/dashboard/tickets/${ticketId}`;
+  const logoUrl = "https://dingbat-brussels-dimmer.ngrok-free.dev/assets/img/logo_text.svg";
+  const ticketUrl = `https://dingbat-brussels-dimmer.ngrok-free.dev/dashboard/tickets/${ticketId}`;
 
   const formatSlaType = (type: string) => {
     return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');

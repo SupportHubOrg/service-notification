@@ -3,7 +3,7 @@ import { mailer } from "../config/mailer";
 import { OrganizationTier } from "../contracts/events";
 import { buildPaymentCompletedHtml, buildPaymentFailedHtml } from "../templates/billingTemplates";
 import { buildSlaDeadlineBreachedHtml, buildSlaDeadlineHtml, buildTicketCreatedHtml, buildTicketMessageHtml, buildTicketUpdateHtml } from "../templates/ticketTemplates";
-import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml } from "../templates/userTemplates";
+import { buildOrganizationCreatedHtml, buildOrganizationInviteHtml, buildOrganizationConfirmationHtml } from "../templates/userTemplates";
 
 export const sendTicketConfirmation = async (userEmail: string, title: string, ticketId: string): Promise<boolean> => {
   try {
@@ -19,15 +19,37 @@ export const sendTicketConfirmation = async (userEmail: string, title: string, t
 };
 
 
-export const sendOrgCreationConfirmation = async (userEmail: string, organizationName: string, organizationId: string, tier:OrganizationTier): Promise<boolean> => {
+export const sendOrgCreationConfirmation = async (UserEmail: string, OrganizationName: string, OrganizationId: string, Tier: OrganizationTier): Promise<boolean> => {
   try {
-    const subject = `New Organization Created: ${organizationName}`;
-    const htmlContent = buildOrganizationCreatedHtml(userEmail, organizationName,organizationId,tier);
+    const subject = `New Organization Created: ${OrganizationName}`;
+    const htmlContent = buildOrganizationCreatedHtml(UserEmail, OrganizationName, OrganizationId, Tier);
 
-    await mailer.sendMail(userEmail, subject, htmlContent);
+    await mailer.sendMail(UserEmail, subject, htmlContent);
     return true;
   } catch (error) {
-    console.error(`[Email Service] Error while sending sendOrgCreationConfirmation email to ${userEmail}:`, error);
+    console.error(`[Email Service] Error while sending sendOrgCreationConfirmation email to ${UserEmail}:`, error);
+    return false;
+  }
+};
+
+export const sendOrgRegistrationConfirmation = async (
+  UserEmail: string, 
+  OrganizationName: string, 
+  OrganizationId: string, 
+  ManagerId: string, 
+  Token: string
+): Promise<boolean> => {
+  try {
+    const baseUrl = process.env.FRONTEND_URL || "https://dingbat-brussels-dimmer.ngrok-free.dev";
+    const confirmationLink = `${baseUrl}/confirm-organization?orgId=${OrganizationId}&token=${Token}&managerId=${ManagerId}`;
+    
+    const subject = `Action Required: Confirm Workspace - ${OrganizationName}`;
+    const htmlContent = buildOrganizationConfirmationHtml(UserEmail, OrganizationName, confirmationLink);
+
+    await mailer.sendMail(UserEmail, subject, htmlContent);
+    return true;
+  } catch (error) {
+    console.error(`[Email Service] Error sending registration confirmation to ${UserEmail}:`, error);
     return false;
   }
 };
